@@ -1,5 +1,11 @@
 # NLP using sequential models
 
+<style>
+  body {
+    font-size: 130%;
+  }
+</style>
+
 ## Neural Networks
 
 ![alt text](image.png)
@@ -26,7 +32,7 @@ Every other tweet have 0s to match the size of the longest tweet which known as 
 An n-gram is a sequence of n consecutive words (or characters) from a text. The idea is that you can estimate the probability of a word based on the words that came before it.  
 
 $$P(w2|w1) = \frac{\text{count(w1,w2)}}{\text{count(w1)}} → Bigrams$$  
-$$P(w3|w1,w2) = \frac{\text{count(w1,w2,w3)}}{\text{count(w1,w2)}} → Trigrams$$  
+$$P(w3|w1,w2) = \frac{\text{count(w1,w2,w3)}}{\text{count(w1,w2)}} Trigrams$$  
 $$P(w1,w2,w3) = P(w1) \times P(w2|w1) \times P(w3|w2)$$  
 
 ![alt text](image-1.png)  
@@ -97,3 +103,43 @@ The RNN is very useful and **this is arguably where RNNs shine most**. The encod
 - **Long-range dependencies**: as a practical consequence of vanishing gradients, RNNs struggle with sentences like  "The trophy didn't fit in the suitcase because it was too big." Resolving what "it" refers to requires connecting tokens far apart, and a vanilla RNN often fails this
 
 **LSTMs** and **GRUs** were invented specially to address the vanishing gradient problem by introducing gating mechanisms that let the network learn *what to remember and what to forget*. They are the natural evolution from vanilla RNNs
+
+### Math of RNN
+
+The core forward pass of a vanilla RNN at each time step is described by two equations  
+
+Equation 1: the hidden state update  
+
+$$ h^t = \tanh(W_h \cdot h^{t-1} + W_x \cdot x^t + b_h) $$  
+
+Equation 2: the prediction
+
+$$\hat{y}^t = g(W_{yh} \cdot h^t + b_y)$$  
+
+These are the core forward-pass equations of a vanilla RNN. The same parameters `W_h`, `W_x`, `W_yh`, `b_h`, and `b_y` are reused at every time step.
+
+The meaning of the symbols:
+
+`xᵗ`: the input at time step t. For NLP, this is typically a word embedding vector (list of numbers representing the current word). Dimension: `[n_x * 1]` .  
+
+`hᵗ`: the hidden state at time t. This is the memory, it encodes everything the RNN has seen up to and including step t. Dimension: `[n_h * 1]`.  
+
+`hᵗ⁻¹`: the hidden state from the previous step. At t=1, this is $h^0$, which is typically initialized to a vector of all zeros.
+
+`Wₕ`: weight matrix applied to the previous hidden state. Dimension: `[n_h * n_h]`. These weights control how much of the previous memory is transformed and carried forward.  
+
+`Wₓ`: weight matrix applied to the current input. Dimension: `[n_h * n_x]`. These weights project the input into the hidden state space.  
+
+`b_h`: bias vector for the hidden state. Dimension `[n_h * 1]`. It shifts the result before the activation.  
+
+`tanh`: the activation function for the hidden state. It squashes any number into the range (-1, +1) which keeps the hidden state bounded, although vanilla RNNs can still suffer from vanishing or exploding gradients during training.  
+
+`W_yh`: weight matrix applied to the hidden state to produce the output. Dimension" `[n_y * n_h]`.  
+
+`b_y`: bias for the output layer. Dimension `[n_y * 1]`.  
+
+`g`: a second activation function applied to get the final prediction. For sentiment analysis (positive/negative), this would be a sigmoid. For word prediction over a vocabulary, it would be softmax.
+
+`ŷᵗ`: the prediction at time step t.  
+
+![alt text](image-5.png)
