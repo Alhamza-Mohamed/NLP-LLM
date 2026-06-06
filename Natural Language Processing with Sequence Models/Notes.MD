@@ -1,10 +1,21 @@
-# NLP using sequential models
-
 <style>
+/* General note styling */  
   body {
     font-size: 130%;
   }
+
+    img {
+    display: block;
+    margin: 20px auto;
+    max-width: 70%;
+    }
+
+    .math {
+    text-align: center;
+}
 </style>
+
+# NLP using sequential models
 
 ## Neural Networks
 
@@ -62,6 +73,8 @@ The same weight matrices ($W_x W_h W_{\gamma}$) are reused at every step, that's
 
 ![alt text](image-2.png)
 
+---
+
 ### Why is RNN better than n-grams (what is solved)
 
 - **Unlimited context window**: the hidden state theoretically carries information form the very first token all the way to the current one. There is no fixed n; every previous word influences the current hidden state.
@@ -73,6 +86,8 @@ The same weight matrices ($W_x W_h W_{\gamma}$) are reused at every step, that's
 - **No exponential storage growth**: the model parameters are fixed regardless of sequence length. The RNN doesn't need a lookup table that grows with the vocabulary size the way n-gram count tables do
 
 ![alt text](image-3.png)
+
+---
 
 ### Applications of RNNs
 
@@ -103,6 +118,8 @@ The RNN is very useful and **this is arguably where RNNs shine most**. The encod
 - **Long-range dependencies**: as a practical consequence of vanishing gradients, RNNs struggle with sentences like  "The trophy didn't fit in the suitcase because it was too big." Resolving what "it" refers to requires connecting tokens far apart, and a vanilla RNN often fails this
 
 **LSTMs** and **GRUs** were invented specially to address the vanishing gradient problem by introducing gating mechanisms that let the network learn *what to remember and what to forget*. They are the natural evolution from vanilla RNNs
+
+---
 
 ### Math of RNN
 
@@ -143,3 +160,186 @@ The meaning of the symbols:
 `ŷᵗ`: the prediction at time step t.  
 
 ![alt text](image-5.png)
+
+---
+
+#### Walking through math steps
+
+Lets say the hidden state and input are both small 3-dimensional vectors, and the network is at step =2 processing the word "happy"
+
+Step 1: multiply $h^{t-1}$ by $W_h$.
+The previous hidden state (say `[0.5, -0.3, 0.8]`) gets multiplied by the $W_h$ matrix. This is standard matrix-vector multiply. The result is a new 3D vector, call it `v1`.  
+
+Step 2:  multiply $x^t$ by $W_x$. The word embedding for "happy"  (say `[0.1, 0.9, 0.2]`) gets multiplied by the $W_x$ matrix. Another 3D vector, call it `v2`.  
+
+step 3: add element-wise and add bias `z = v1 + v2 + b_h`. The three vectors are just add together, position by position. This is what is meant by "element-wise sum".  
+
+Step 4: apply tanh: `hᵗ = tanh(z)`. Apply tanh to each element of `z` individually. If `z` had a value of 3.2 in one position, `tanh(3.2) ≈ 0.997`. If it had -0.5, `tanh(-0.5) ≈ -0.462`. Every value is now squashed into the range (-1, 1). This becomes the new hidden state, and also gets passed to the next step.
+
+Step 5: compute the prediction: `ŷᵗ = g(W_yh · hᵗ + b_y)`. The hidden state is multiplied by another weight matrix `W_yh`, bias is added, then a final activation function `g` is applied.
+For sentiment classification, `g` would usually be sigmoid, giving a number between 0 (negative) and 1 (positive). In many sentiment models, this prediction is made from the final hidden state rather than at every time step.  
+
+---
+
+#### Example on RNN
+
+**Setup:**  
+
+**Task:** Classify the sentiment of "I love" (2 words, so T=2 steps).  
+**Output:** single value at the last step only — ŷ² — where >0.5 means positive.  
+**True label:** y = 1 (positive)
+  
+**Dimensions:**
+
+- Input embedding size: n_x = 2
+
+- Hidden state size: n_h = 2
+
+- Output size: n_y = 1
+
+---
+
+**Given Values**:  
+**Word embeddings:**
+
+- x¹ = "I"    = [1, 0]ᵀ
+
+- x² = "love" = [0, 1]ᵀ
+**Initial hidden state:**
+  
+- h⁰ = [0, 0]ᵀ
+**Weight matrices:**
+  
+```
+Wₓ   = | 1   0 |      Wₕ  = | 0.5  0   |      W_yh = | 1  1 |
+        | 0   1 |             | 0    0.5 |
+```
+  
+**Biases:**
+  
+- b_h = [0, 0]ᵀ
+
+- b_y = 0
+
+---
+
+**The Two Core Equations**  
+
+**Hidden state update:**
+> hᵗ = tanh( Wₓ · xᵗ + Wₕ · hᵗ⁻¹ + b_h )
+  
+**Prediction:**
+> ŷᵗ = g( W_yh · hᵗ + b_y )
+  
+---
+  
+**Step 1 — Compute h¹ (processing "I")**:  
+  
+**First term — Wₓ · x¹:**
+```
+| 1  0 |   | 1 |   | 1 |
+| 0  1 | × | 0 | = | 0 |
+```
+  
+**Second term — Wₕ · h⁰:**
+```
+| 0.5  0   |   | 0 |   | 0 |
+| 0    0.5 | × | 0 | = | 0 |
+```
+  
+**Sum + bias:**
+```
+z¹ = [1, 0] + [0, 0] + [0, 0] = [1, 0]
+```
+  
+**Apply tanh element-wise:**
+```
+h¹ = tanh([1, 0]) = [tanh(1), tanh(0)] = [0.762, 0]
+```
+  
+---
+  
+**Step 2 — Compute h² (processing "love")**:  
+  
+**First term — Wₓ · x²:**
+```
+| 1  0 |   | 0 |   | 0 |
+| 0  1 | × | 1 | = | 1 |
+```
+  
+**Second term — Wₕ · h¹:**
+```
+| 0.5  0   |   | 0.762 |   | 0.381 |
+| 0    0.5 | × | 0     | = | 0     |
+```
+  
+**Sum + bias:**
+```
+z² = [0, 1] + [0.381, 0] + [0, 0] = [0.381, 1]
+```
+  
+**Apply tanh element-wise:**
+```
+h² = tanh([0.381, 1]) = [tanh(0.381), tanh(1)] = [0.365, 0.762]
+```
+  
+> **Note:** h² carries information from both "I" (via h¹ flowing through Wₕ) and "love" (via x²). That is the memory working.
+  
+---
+ 
+**Step 3 — Compute the Prediction ŷ²**:  
+  
+**W_yh · h² + b_y:**
+```
+[1  1] × | 0.365 | + 0 = 0.365 + 0.762 = 1.127
+          | 0.762 |
+```
+  
+**Apply sigmoid (g = σ for binary classification):**
+```
+ŷ² = σ(1.127) = 1 / (1 + e^{-1.127})
+              = 1 / (1 + 0.324)
+              = 1 / 1.324
+              ≈ 0.755
+```
+  
+---
+  
+**Step 4 — Compute the Loss**  
+  
+**Binary cross-entropy:**
+```
+L = -(y · log(ŷ) + (1 - y) · log(1 - ŷ))
+  = -(1 · log(0.755) + 0 · log(0.245))
+  = -log(0.755)
+  ≈ 0.281
+```
+  
+The model predicted **0.755** (positive), true label was **1** (positive) → loss is low ✓
+  
+---
+  
+**Summary**:  
+  
+| Step | Operation | Result |
+|------|-----------|--------|
+| t=1 input | x¹ = "I" = [1, 0] | — |
+| t=1 hidden | tanh(Wₓ·x¹ + Wₕ·h⁰ + b_h) | h¹ = [0.762, 0] |
+| t=2 input | x² = "love" = [0, 1] | — |
+| t=2 hidden | tanh(Wₓ·x² + Wₕ·h¹ + b_h) | h² = [0.365, 0.762] |
+| prediction | σ(W_yh · h² + b_y) | ŷ² = 0.755 |
+| loss | -log(ŷ²) | L ≈ 0.281 |
+  
+---
+  
+**Key Insight**  
+  
+The hidden state is the thread connecting all time steps.  
+
+- After t=1: h¹ encodes only "I"  
+
+- After t=2: h² encodes both "I" and "love"  
+
+- The final prediction is made from h², which carries the full context of the sentence
+
+If the model had predicted 0.2 instead of 0.755, the loss would be -log(0.2) ≈ **1.609** — much higher, which is what drives weight updates during backpropagation.
