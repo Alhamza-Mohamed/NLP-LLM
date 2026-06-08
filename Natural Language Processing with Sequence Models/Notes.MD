@@ -181,6 +181,66 @@ For sentiment classification, `g` would usually be sigmoid, giving a number betw
 
 ---
 
+#### RNN cost function
+
+In a normal multi-class classification problem, one input produces one prediction vector:
+
+$$
+\hat{y} = [\hat{y}_1, \hat{y}_2, ..., \hat{y}_k]
+$$
+
+where `k` is the number of classes.
+
+The true label `y` is usually one-hot encoded. For example, if there are 3 classes:
+
+```md
+y = [0, 1, 0]
+```
+
+The cross-entropy loss for one prediction is:
+
+$$
+L = - \sum_{j=1}^{k} y_j \log(\hat{y}_j)
+$$
+
+Because `y` is one-hot, only the probability assigned to the correct class matters. So if the correct class is class `c`, the loss becomes:
+
+$$
+L = -\log(\hat{y}_c)
+$$
+
+This means the model gets a small loss when it assigns high probability to the correct class, and a large loss when it assigns low probability to the correct class.
+
+For a vanilla RNN, the model can produce a prediction at every time step:
+
+$$
+\hat{y}^1, \hat{y}^2, ..., \hat{y}^T
+$$
+
+So instead of computing cross-entropy once, we compute it at every time step and then take the average over time:
+
+$$
+L = -\frac{1}{T} \sum_{t=1}^{T} \sum_{j=1}^{k} y_j^t \log(\hat{y}_j^t)
+$$
+
+Where:
+
+`T`: total number of time steps in the sequence.
+
+`k`: number of classes.
+
+`y_j^t`: the true label value for class `j` at time step `t`.
+
+`\hat{y}_j^t`: the predicted probability for class `j` at time step `t`.
+
+The main idea:
+
+For each time step, compare the RNN prediction `ŷᵗ` with the true label `yᵗ` using cross-entropy. Then average all time-step losses to get the loss for the whole sequence.
+
+For the whole dataset, we repeat this process for every training example and average/sum the losses across all examples.
+
+---
+
 #### Example on RNN
 
 **Setup:**  
@@ -342,4 +402,96 @@ The hidden state is the thread connecting all time steps.
 
 - The final prediction is made from h², which carries the full context of the sentence
 
-If the model had predicted 0.2 instead of 0.755, the loss would be -log(0.2) ≈ **1.609** — much higher, which is what drives weight updates during backpropagation.
+If the model had predicted 0.2 instead of 0.755, the loss would be -log(0.2) ≈ **1.609** — much higher, which is what drives weight updates during back propagation.  
+
+---
+
+## Gated recurrent unites  
+
+GRU networks are a type of RNN designed to handle sequential data while reducing the complexity of traditional RNN.
+
+**What problem does GRu solve?**  
+Vanilla RNN updates its hidden state at every step with the same formula regardless of what the input is.  
+Over long sequences, early information gets diluted an eventually vanishes, the vanishing gradient problem.  
+The GRU fixes this by adding two gates that act as filters, deciding what to keep and what to override.
+
+### Math of GRU
+
+At every time step t, a GRU runs 4 equations in this exact order:
+
+**Equation 1 — Relevance gate Γᵣ**  
+$$\Gamma_r = \sigma\left( W_r \cdot [h^{t-1}, x^t] + b_r \right)$$  
+
+Controls how much of the previous hidden state is relevant to computing the candidate. Output is between 0 and 1. close to 0 means "ignore the past." Close to 1 means "the past matters here."  
+
+**Equation 2 — Update gate**  
+$$\Gamma_u = \sigma\left( W_u \cdot [h^{t-1}, x^t] + b_u \right)$$  
+
+Controls how much of the **old hidden state keep** vs how much to replace with the new information. This is the core memory mechanism
+
+**Equation 3 — Candidate hidden state**  
+$$\tilde{h}^t = \tanh\left( W_h \cdot [\Gamma_r \odot h^{t-1},\ x^t] + b_h \right)$$  
+
+The ⊙ means element-wise multiplication. The relevance gate is applied to the previous hidden state first. If the Γᵣ is close to 0, the previous state is mostly erased before computing the candidate. This is the "proposal" for what the new hidden state could be.  
+
+**Equation 4 — New hidden state**  
+$$h^t = \Gamma_u \odot h^{t-1} + (1 - \Gamma_u) \odot \tilde{h}^t$$  
+The most important equation. The update gate Γᵤ acts as a blending switch:  
+
+- when Γᵤ ≈ 1 → Keep almost all of the old hidden state hᵗ⁻¹ (ignore the candidate).
+
+- when Γᵤ ≈ 0 → replace the hidden state entirely with the candidate h̃ᵗ
+
+- when Γᵤ ≈ 0.5 → blend both equally  
+
+**Equation 5 — Prediction**  
+$$\hat{y}^t = g\left( W_y \cdot h^t + b_y \right)$$  
+
+Same as vanilla RNN, apply an activation function to the current hidden state.  
+
+The meaning of the symbols:
+
+`Γᵣ`: Relevance gate, a vector of values between 0 and 1, controlling how much of the past hidden state is used when computing the candidate.  
+
+`Γᵤ`: Update gate, a vector of values between 0 and 1, controlling how much of the old hidden state to keep vs replace.  
+
+`σ`: Sigmoid function, squashed any number into (0,1).  
+
+`tanh`: Hyperbolic tangent. squash any number into (-1,1). Used for the candidate hidden state.  
+
+`⊙`: Element-wise multiplication (Hadamard product), multiply two vectors position by position, NOT matrix multiplication.  
+
+`[a,b]`: Concatenation, stacking two vectors into one longer vector, e.g. [0.8, 0.4] and [0, 1] → [0.8, 0.4, 0, 1].  
+
+`hᵗ`: Hidden state at current time step t, the memory the GRU passes forward.  
+
+`hᵗ⁻¹`: Hidden state at previous time step, the memory inherited from the past.  
+
+`h̃ᵗ`: Candidate hidden state,the proposed new memory, not yet committed.  
+
+`xᵗ`: Input at step t.  
+
+`Wᵣ`: weight matrix for the the relevance gate.
+
+`Wᵤ`: weight matrix for the update gate.  
+
+`Wₕ`: weight matrix for the candidate computation.  
+
+`Wᵧ`: weight matrix for the output prediction.  
+
+`bᵣ`: Bias vector for the the relevance gate.
+
+`bᵤ`: Bias vector for the update gate.  
+
+`bₕ`: Bias vector for the candidate hidden state.  
+
+`bᵧ`: Bias vector for the output.  
+
+`ŷᵗ`: Predicted output at time step t.
+
+`g`: Output activation function, sigmoid for binary classification, softmax for multi-class.  
+
+`(1 − Γᵤ)`: The complement of the update gate, what fraction of the candidate to let in, if Γᵤ keeps 70% of the old state, this brings in 30% of the new candidate.  
+
+![alt text](image-6.png)
+
