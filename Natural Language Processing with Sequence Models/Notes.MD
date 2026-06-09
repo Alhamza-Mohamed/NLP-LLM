@@ -493,5 +493,5 @@ The meaning of the symbols:
 
 `(1 − Γᵤ)`: The complement of the update gate, what fraction of the candidate to let in, if Γᵤ keeps 70% of the old state, this brings in 30% of the new candidate.  
 
-![alt text](image-6.png)
 
+![alt text](image-8.png)
