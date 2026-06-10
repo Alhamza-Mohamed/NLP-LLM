@@ -494,4 +494,63 @@ The meaning of the symbols:
 `(1 − Γᵤ)`: The complement of the update gate, what fraction of the candidate to let in, if Γᵤ keeps 70% of the old state, this brings in 30% of the new candidate.  
 
 
-![alt text](image-8.png)
+![alt text](image-8.png)  
+
+---
+
+## Bidirectional RNNs (BRNNs)  
+
+**The problem with vanilla RNN**  
+A vanilla RNN only read teh sequence left to right, it only knows what come before the current word. For example
+> "I was trying really hard to get a hold of ___. Louise finally answered..."  
+
+A vanilla RNN reading left to right reaches the blank and has no idea "Louise" is coming in the next sentence. It has to guess between "her", "him", "them."  
+
+A human reads the next sentence and immediately fills the blank with "her", because humans naturally use context from both direction.  
+
+How BRNN solve this
+A BRNN  runs two independent RNNs simultaneously on the same sequence:
+
+- Forward RNN → reads left to right, produces hidden state h¹, →h², ..., →hᵀ  
+
+- Backward RNN → reads right to left, produces hidden states ←h¹, ←h², ..., ←hᵀ  
+
+The two directions are **completely independent**, meaning no loops between directions. They are just run in parallel, and you can start from either left or right with no problem.  
+
+**The prediction equation**  
+
+At each time step t, both hidden states are concatenated and used together to make the prediction:
+
+$$ 
+\hat{y}^t = g(W_y \cdot [\overrightarrow{h}^t, \overleftarrow{h}^t] + b_y)
+ $$  
+
+This is identical to the vanilla RNN output equation, except instead of just hᵗ you now feed in both hidden states joined together.  
+
+## Deep RNNs
+
+**The idea**  
+A vanilla RNN is one layer deep, at each time step, one hidden state is computed and a prediction is made. 
+A deep RNN stacks **multiple RNN layers on top of each other**, exactly like how a deep feed-forward network stacks multiple dense layers.  
+
+**How information flows**  
+
+1- **Horizontally - through time**: at each layer, the hidden state is passed from step t to step t+1, just like a vanilla RNN.
+
+2- **Vertically - through layers**: the hidden state output of layer 1 at step t becomes the input to layer 1 + 1 at the same step t.This is identical to how activations flow upward through layers in a regular deep network.  
+
+**The equation**  
+
+For layer 1 at time step t, the two equations are the same as vanilla RNN just with a superscript for the layer number:  
+$$
+h_t^{(l)} = g(W^{(l)} h_t^{(l-1)} + U^{(l)} h_{t-1}^{(l)} + b^{(l)})
+$$  
+
+The only difference from vanilla RNN is that `xᵗ` is replaced by `hᵗ⁽ˡ⁻¹⁾`, the hidden state from the layer blow. The first layer still takes the raw word embedding as input.
+
+**Why depp RNNs capture more that shallow ones?**  
+A single-layer RNN can only learn one level of abstraction. Stacking layers lets each layer build on top of the previous one, exactly like in deep fed-forward networks:
+
+- Layer 1: learns low-level patters (individual word features)  
+- Layer 2: learns combinations of those patters (phrases, local context)  
+- Layer 3: learns higher-level abstraction (sentence meaning, topic)
