@@ -19,7 +19,7 @@
 
 ## Neural Networks
 
-![alt text](image.png)
+<img src="images/image.png"/>
 
 Every word in the training set has a corresponding integer and each tweet has a vector representation of all words inside it.  
 The size of the vector representation is = to the size of the longest tweet.  
@@ -46,7 +46,7 @@ $$P(w2|w1) = \frac{\text{count(w1,w2)}}{\text{count(w1)}} → Bigrams$$
 $$P(w3|w1,w2) = \frac{\text{count(w1,w2,w3)}}{\text{count(w1,w2)}} Trigrams$$  
 $$P(w1,w2,w3) = P(w1) \times P(w2|w1) \times P(w3|w2)$$  
 
-![alt text](image-1.png)  
+<img src="images/image-1.png"/> 
 
 #### Limitations of N-gram
 
@@ -71,7 +71,7 @@ At each step $t$:
 
 The same weight matrices ($W_x W_h W_{\gamma}$) are reused at every step, that's what "recurrent" means
 
-![alt text](image-2.png)
+<img src="images/image-2.png"/>
 
 ---
 
@@ -85,13 +85,13 @@ The same weight matrices ($W_x W_h W_{\gamma}$) are reused at every step, that's
 
 - **No exponential storage growth**: the model parameters are fixed regardless of sequence length. The RNN doesn't need a lookup table that grows with the vocabulary size the way n-gram count tables do
 
-![alt text](image-3.png)
+<img src="images/image-3.png"/> 
 
 ---
 
 ### Applications of RNNs
 
-![alt text](image-4.png)
+<img src="images/image-4.png"/> 
 
 **One to one task**: A single input produces a single output. Ex: a list of football scores (input) used to predict leaderboard position (output).  
 The Rnn is not very useful here as this is barely different from a regular feed forward neural network. The RNN just adds a hidden state $h_0$, but since there's no real sequence to process that hidden state doesn't do anything meaningful. A standard neural network handles this just fine.  
@@ -159,7 +159,7 @@ The meaning of the symbols:
 
 `ŷᵗ`: the prediction at time step t.  
 
-![alt text](image-5.png)
+<img src="images/image-5.png"/> 
 
 ---
 
@@ -494,7 +494,7 @@ The meaning of the symbols:
 `(1 − Γᵤ)`: The complement of the update gate, what fraction of the candidate to let in, if Γᵤ keeps 70% of the old state, this brings in 30% of the new candidate.  
 
 
-![alt text](image-8.png)  
+<img src="images/image-8.png"/>  
 
 ---
 
