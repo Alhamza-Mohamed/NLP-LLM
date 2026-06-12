@@ -135,6 +135,22 @@ $$\hat{y}^t = g(W_{yh} \cdot h^t + b_y)$$
 
 These are the core forward-pass equations of a vanilla RNN. The same parameters `W_h`, `W_x`, `W_yh`, `b_h`, and `b_y` are reused at every time step.
 
+**Weight and Bias Sizes**  
+
+Where:
+- $n_x$ = input size (embedding dimension)
+- $n_h$ = hidden state size
+- $n_y$ = output size (number of classes)
+
+| Parameter | Size | Why |
+|-----------|------|-----|
+| $W$ | $(n_h \times (n_x + n_h))$ | must match the concatenated input $[x^t, h^{t-1}]$ |
+| $b_h$ | $(n_h \times 1)$ | one bias per hidden unit |
+| $W_{yh}$ | $(n_y \times n_h)$ | maps hidden state to output size |
+| $b_y$ | $(n_y \times 1)$ | one bias per output unit |
+
+**Rule:** rows = output size, columns = input size.
+
 The meaning of the symbols:
 
 `xᵗ`: the input at time step t. For NLP, this is typically a word embedding vector (list of numbers representing the current word). Dimension: `[n_x * 1]` .  
