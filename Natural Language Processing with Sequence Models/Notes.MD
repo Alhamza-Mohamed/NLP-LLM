@@ -121,6 +121,88 @@ The RNN is very useful and **this is arguably where RNNs shine most**. The encod
 
 ---
 
+#### Solutions to vanishing gradient problems
+
+1- Identity RNN with ReLU activation:  
+The Idea: the vanishing gradient in vanilla RNN is caused by two things working against each other:  
+
+- The wight matrix Wₕ gets multiplied by itself repeatedly across time steps.  
+- The tanh derivative is always < 1, shrinking the gradient further each step.
+
+The identity RNN fixes the weight matrix part by initializing Wₕ as the  **identity matrix** instead of random values:
+
+$$W_h = I = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}$$
+
+And replaces tanh with ReLU as the activation function.  
+
+**Why the identity matrix helps?**
+
+Because multiplying identity matrix by it repeatedly doesn't shrink or explode the gradient it leaves it unchanged.  
+
+**Why ReLU instead of tanh?**
+
+Because its derivative is either 0 or 1. That derivative of 1 means gradients pass through ReLU without being shrunk at all — unlike tanh whose derivative peaks at 1 but quickly drops towards 0 for large inputs
+
+**The trade off**  
+
+This works well at initialization but the identity constraint relaxes during training as weights update. It also introduces the dying **ReLU problem**; neurons that output 0 stop receiving gradients entirely and never recover. It is a useful trick but not a complete solution.
+
+2- Skip connections (Residual connections):  
+
+The idea: Skip connections is the most powerful and widely used solution. Instead of forcing information to pass through every layer's transformation, you add a direct shortcut that bypasses one or more layers entirely:
+
+$$ h^t = F(h_{t-1} + h^{t+1}) $$  
+
+Where F is whatever transformation the layer applies (weight multiply + activation). 
+The `+ h^{t-1}` part is the skip connection, it adds the inputs directly to the output.
+
+Why this kills the vanishing gradient?  
+
+During backpropagation, gradients flow back through the network.
+Without skip connections, the gradient must pass through every transformation, getting multiplied by small numbers at each step.
+With a skip connection, the gradient has a direct highway back through the addition.
+
+$$\frac{\partial h_t}{\partial h_{t-1}} = \frac{\partial F(h_{t-1})}{\partial h_{t-1}} + 1$$  
+
+That `+ 1` means if `∂F/∂h` vanishes completely, the gradient is still at least 1.
+Early layers always receive a signal regardless of how deep the network is.
+
+Visually
+
+``` text
+Without skip:    x → [Layer] → [Layer] → [Layer] → output
+                        ↑ gradient shrinks at each arrow
+
+With skip:       x → [Layer] → [Layer] → [Layer] → output
+                  \_____________↑___________↑
+                     direct gradient highways
+```
+
+**The tradeoff**: Almost none, skip connections are essentially free. Thy became the foundation of RsNet (image recognition) and are baked into every modern architecture including Transformers. The only cost is a small amount of extra addition operations, which is negligible.  
+
+---
+
+#### Solutions to exploding gradient problems  
+
+**Gradient clipping**  
+
+The idea: when gradients grow uncontrollably  bly large (values like 10⁶), weight updates become enormous and training collapses.
+Gradient clipping simply caps the gradient at a maximum threshold before the weight update
+
+How it works: After computing the gradient vector g, check its norm $||g||$.  
+
+If the norm exceeds a threshold (say 5.0), rescale the entire gradient vector so its norm equals exactly that threshold.  
+
+**What this preserves?**  
+The rescaling keeps the direction of the gradient identical, by making the vector shorter, not changing where it points.
+So the weight update still moves in the right direction, just with a controlled step size.  
+
+**Tradeoff**  
+Gradient clipping is a safety measure, the tradeoffs are negligible in practice. It can slow down training but the slower convergence is usually barely noticeable.
+Also the threshold is manual hyperparameter but picking it is a noe-time minor tuning step.
+
+---
+
 ### Math of RNN
 
 The core forward pass of a vanilla RNN at each time step is described by two equations  
@@ -138,7 +220,8 @@ These are the core forward-pass equations of a vanilla RNN. The same parameters 
 **Weight and Bias Sizes**  
 
 Where:
-- $n_x$ = input size (embedding dimension)
+
+- $n_x$ = input size (embedding dimension)  
 - $n_h$ = hidden state size
 - $n_y$ = output size (number of classes)
 
