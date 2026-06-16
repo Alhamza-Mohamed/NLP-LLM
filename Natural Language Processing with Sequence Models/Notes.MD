@@ -652,4 +652,30 @@ A single-layer RNN can only learn one level of abstraction. Stacking layers lets
 
 - Layer 1: learns low-level patters (individual word features)  
 - Layer 2: learns combinations of those patters (phrases, local context)  
-- Layer 3: learns higher-level abstraction (sentence meaning, topic)
+- Layer 3: learns higher-level abstraction (sentence meaning, topic)  
+
+---
+
+## Long short-term memory (LSTM)
+
+LSTMs are most well-known solution to the vanishing gradient problem, GRUs also addressed this, but LSTMs came first and are more widely known.
+The core idea is the same: learn what to remember and what to forget, rather than blindly updating the hidden state at every state at every step like a vanilla RNN.  
+
+**The two states**: Unlike vanilla RNN which has only one hidden state h, an LSTM carries two things through time:
+
+- Cell state (C): the long term memory, it is like a conveyor belt running through the entire sequence, carrying important information across many steps with minimal interference.  
+- Hidden state  (H): the working memory, this where active computations happen at each step, and it's also what produces the output.  
+
+The separation of these two states is what makes LSTMs powerful, the cell state can preserve information from much earlier in the sequence without it being overwritten at every step.  
+
+**The Three gates**: at each step, information flows through three gates. Each gate is a filter that decides how much information to let through:
+
+- Forget gate: looks at current input and the previous hidden state, then decides which parts of the cell state are no longer useful and throws them away. This is the "stop remember this" mechanism.
+
+- Input gate: decides which new information from the current input and previous hidden state is relevant enough to be added to the cell state. This is the "start remembering this" mechanism.
+
+- Output gate: decides which parts of the updated cell state are relevant right now, and uses them to produce the hidden state and the prediction at this time step. This is "what do I say right now" mechanism.
+
+**The phone call analogy**  
+
+The lecture gives a great intuition for this. When your phone rings you're thinking about unrelated things — the forget gate clears those out. As your friend starts talking, the input gate picks up what's relevant to the conversation and adds it to your memory. As the conversation continues, the output gate decides what from your memory is relevant to say at each moment. By the end of the call your memory contains the most important parts of the conversation — that's the cell state after the full sequence.
