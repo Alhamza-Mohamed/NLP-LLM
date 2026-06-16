@@ -784,3 +784,24 @@ $$h_t = o_t ⊙ tanh(c_t)$$
 
 <img src="images/image-10.png"/>  
 
+---
+
+## Named entity recognition  
+
+Named entity recognition (NER) is a component of NLP that locates and extract predefined categories of objects in body of text (e.g. places, organizations, names, time and dates.)  
+
+**Types of entities**  
+
+- Geographical entity (e.g. The Nile).
+- Geopolitical entity (e.g. Egypt).
+- Organization (e.g. Google).
+- Time indicator (e.g. December).
+- Artifact (e.g. Egyptian statue).
+- Person name.  
+
+**Application of NER systems**  
+
+- Search engine efficiency
+- Recommendation engines
+- Customer service
+- Automatic trading
