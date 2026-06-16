@@ -678,4 +678,13 @@ The separation of these two states is what makes LSTMs powerful, the cell state 
 
 **The phone call analogy**  
 
-The lecture gives a great intuition for this. When your phone rings you're thinking about unrelated things — the forget gate clears those out. As your friend starts talking, the input gate picks up what's relevant to the conversation and adds it to your memory. As the conversation continues, the output gate decides what from your memory is relevant to say at each moment. By the end of the call your memory contains the most important parts of the conversation — that's the cell state after the full sequence.
+The lecture gives a great intuition for this. When your phone rings you're thinking about unrelated things — the forget gate clears those out. As your friend starts talking, the input gate picks up what's relevant to the conversation and adds it to your memory. As the conversation continues, the output gate decides what from your memory is relevant to say at each moment. By the end of the call your memory contains the most important parts of the conversation — that's the cell state after the full sequence.  
+
+**Applications on LSTMs:**  
+
+- Next-character prediction.
+- chat bots.
+- Music composition.
+- Image captioning.
+- Speech recognition.
+
