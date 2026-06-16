@@ -234,7 +234,7 @@ Where:
 
 **Rule:** rows = output size, columns = input size.
 
-The meaning of the symbols:
+**The meaning of the symbols:**
 
 `xᵗ`: the input at time step t. For NLP, this is typically a word embedding vector (list of numbers representing the current word). Dimension: `[n_x * 1]` .  
 
@@ -514,6 +514,8 @@ Vanilla RNN updates its hidden state at every step with the same formula regardl
 Over long sequences, early information gets diluted an eventually vanishes, the vanishing gradient problem.  
 The GRU fixes this by adding two gates that act as filters, deciding what to keep and what to override.
 
+---
+
 ### Math of GRU
 
 At every time step t, a GRU runs 4 equations in this exact order:
@@ -626,6 +628,8 @@ $$
 
 This is identical to the vanilla RNN output equation, except instead of just hᵗ you now feed in both hidden states joined together.  
 
+---
+
 ## Deep RNNs
 
 **The idea**  
@@ -687,4 +691,96 @@ The lecture gives a great intuition for this. When your phone rings you're think
 - Music composition.
 - Image captioning.
 - Speech recognition.
+
+---
+
+### Math of LSTM  
+
+Equation 1 Forget gate:
+
+$$f = {\sigma} (W_f [h_{t-1} ; x_t ] + b_f)$$
+
+- Takes $h^{t-1}$ and $x^{t}$ concatenates them, then multiplies by Wf, then add bias.  
+- Sigmoid activation function squashes output to (0,1)
+- This vector multiples the old cell state $C^{t-1}$, values near 0 erased, while values near 1 are kept
+- Its job to decide what to forget from the long term memory.
+
+Equation 2 Input gate:
+
+$$i = {\sigma} (W_i [h_{t-1} ; x_t ] + b_i)$$
+
+- Same structure as forget gate but with its own weights $W_i$
+- Apply sigmoid activation and output i is a vector between (0,1)
+- Acts as a filter on the candidate, it decides which new information is relevant enough to write
+- Its job is to decide how much of the proposed new information to accept
+
+Equation 3 Gate gate / candidate cell state
+
+$$g = tanh (W_g [h_{t-1} ; x_t ] + b_h)$$
+
+- Same inputs, but uses tanh instead of sigmoid to output g is a vector between (-1,1)
+- This is the proposed new content, everything that could be written to cell state
+- It does not get written directly, the input gate (equation 2) filters it first 
+- Its job to propose what new content could me added to the memory
+
+Equation 4 Cell state update
+
+$$c_t = f ⊙ c_{t-1} + i ⊙ g$$
+
+- Left term f ⊙ Cᵗ⁻¹: take the old memory, multiply by the forget gate, this zeros out the parts marked for deletion
+- Right term i ⊙ g: take the candidate, multiply by the input gate, this keeps only the relevant new content
+- Add both terms together to get the updated cell state
+- There is no activation function here, just addition. This is why gradients can flow back through many steps without shrinking 
+- Its job is to update the long-term memory by erasing old and writing new
+
+Equation 5 Output gate
+
+$$o = {\sigma} (W_o [h_{t-1} ; x_t ] + b_o)$$
+
+- Same structure as the other gate but with its own weights $W_o$
+- Have sigmoid activation so the output is a vector between (0,1)
+- The cell state at this point holds everything the network has remembered, the output gate reads it and decides which parts are actually useful to output right now
+- Its job is to decide what part of the current memory is relevant to output at this step
+
+Equation 6 New hidden state
+
+$$h_t = o_t ⊙ tanh(c_t)$$
+
+- Pass the updated cell state through tanh to squash it to (-1,1)
+- Multiply the result by the output gate, this keeps only the currently relevant parts
+- The result $h^t$ is the new hidden state, used to make the prediction $\hat{y}^t$ and passed as input to the next time step
+- Its job is to produce the active working memory and the output for this step
+
+**All together**  
+
+1- Forget gate: $f = {\sigma} (W_f [h_{t-1} ; x_t ] + b_f)$  
+2- Input gate: $i = {\sigma} (W_i [h_{t-1} ; x_t ] + b_i)$  
+3- Gate gate: $g = tanh (W_g [h_{t-1} ; x_t ] + b_h)$  
+4- Cell state update: $c_t = f ⊙ c_{t-1} + i ⊙ g$  
+5- Output gate: $o = {\sigma} (W_o [h_{t-1} ; x_t ] + b_o)$  
+6- New hidden state: $h_t = o_t ⊙ tanh(c_t)$  
+
+**The meaning of the symbols:**  
+
+`[ht−1​;xt​]`: concatenation of previous hidden state and current input  
+
+`⊙`: Element-wise multiplication  
+
+`f`: Forget gate vector
+
+`i`: Input gate vector  
+
+`g`: Candidate cell state (gate gate)  
+
+`o`: Output gate vector  
+
+`ct​`: New cell state (long-term memory)  
+
+`ht​`: New hidden state (working memory)  
+
+`Wf​,Wi​,Wg​,Wo​`: Separate learned weight matrices for each gate  
+
+`bf​,bi​,bg​,bo​`: Separate learned biases for each gate
+
+<img src="images/image-10.png"/>  
 
