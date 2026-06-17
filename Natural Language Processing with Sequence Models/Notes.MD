@@ -805,3 +805,31 @@ Named entity recognition (NER) is a component of NLP that locates and extract pr
 - Recommendation engines
 - Customer service
 - Automatic trading
+
+---
+
+### Training NER
+
+**Processing data for NERs**  
+
+- Assign each class (Person name,Geographical entity, etc.) a number.  
+- Assign each word a number.  
+
+**Token Padding**  
+
+For LSTMs, all sequences need to be the same size
+
+- Set sequence length a certain number.
+- Use the `<PAD>` to fill empty spaces.  
+
+**Training the NER**  
+
+1- Create a tensor for each input and its corresponding number.  
+
+2- Create a data generator to put them in batches, ideal to be a power of 2 (64, 128, 256, ...).  
+
+3- Feed it into an LSTM unit.  
+
+4- Run the output through a dense layer.  
+
+5- Predict using a log softmax (instead of softmax) over k classes.  
