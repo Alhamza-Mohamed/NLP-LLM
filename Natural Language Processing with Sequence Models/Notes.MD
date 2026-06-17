@@ -824,12 +824,22 @@ For LSTMs, all sequences need to be the same size
 
 **Training the NER**  
 
-1- Create a tensor for each input and its corresponding number.  
+1. Create a tensor for each input and its corresponding number.  
 
-2- Create a data generator to put them in batches, ideal to be a power of 2 (64, 128, 256, ...).  
+2. Create a data generator to put them in batches, ideal to be a power of 2 (64, 128, 256, ...).  
 
-3- Feed it into an LSTM unit.  
+3. Feed it into an LSTM unit.  
 
-4- Run the output through a dense layer.  
+4. Run the output through a dense layer.  
 
-5- Predict using a log softmax (instead of softmax) over k classes.  
+5. Predict using a log softmax (instead of softmax) over k classes.  
+
+**Computing Accuracy (Evaluating the model)**  
+
+1. Pass test set through the model.
+
+2. Compute the arg max (the point were your function reach its maximum) across the prediction array.  
+
+3. Mask padded tokens (makes the arrays the same length).  
+
+4. Compare the outputs against test labels.  
