@@ -17,6 +17,35 @@
 
 # NLP using sequential models
 
+## Table of contents
+
+- [NLP using sequential models](#nlp-using-sequential-models)
+  - [Table of contents](#table-of-contents)
+  - [Neural Networks](#neural-networks)
+  - [Neural Networks layers](#neural-networks-layers)
+  - [Traditional language models](#traditional-language-models)
+    - [N-grams](#n-grams)
+      - [Limitations of N-gram](#limitations-of-n-gram)
+  - [Recurrent neural networks (RNN)](#recurrent-neural-networks-rnn)
+    - [Why is RNN better than n-grams (what is solved)](#why-is-rnn-better-than-n-grams-what-is-solved)
+    - [Applications of RNNs](#applications-of-rnns)
+    - [Limitations of RNN](#limitations-of-rnn)
+      - [Solutions to vanishing gradient problems](#solutions-to-vanishing-gradient-problems)
+      - [Solutions to exploding gradient problems](#solutions-to-exploding-gradient-problems)
+    - [Math of RNN](#math-of-rnn)
+      - [Walking through math steps](#walking-through-math-steps)
+      - [RNN cost function](#rnn-cost-function)
+      - [Example on RNN](#example-on-rnn)
+  - [Gated recurrent unites](#gated-recurrent-unites)
+    - [Math of GRU](#math-of-gru)
+  - [Bidirectional RNNs (BRNNs)](#bidirectional-rnns-brnns)
+  - [Deep RNNs](#deep-rnns)
+  - [Long short-term memory (LSTM)](#long-short-term-memory-lstm)
+    - [Math of LSTM](#math-of-lstm)
+  - [Named entity recognition](#named-entity-recognition)
+    - [Training NER](#training-ner)
+  - [Siamese networks](#siamese-networks)
+
 ## Neural Networks
 
 <img src="images/image.png"/>
@@ -843,3 +872,22 @@ For LSTMs, all sequences need to be the same size
 3. Mask padded tokens (makes the arrays the same length).  
 
 4. Compare the outputs against test labels.  
+
+## Siamese networks
+
+Siamese network is type of neural network that made of 2 identical neural networks which are merged at teh end.
+
+**Question duplicates**  
+
+"How old are you" means the same as "What is your age" this called question duplicates.  
+
+On the other hand "Where are you from?" does not have a near meaning to "Where are you going?" have the same first 3 words. However, the last word is different completely changes the meaning of each question.  
+
+Comparing meaning is not simple as comparing words.  
+
+**Application of Siamese networks in NLP:**  
+
+- Authentication of handwritten checks.  
+- Question duplicates (on platforms like Quora or stack overflow).
+- Search aging queries to predict whether a new query is similar to the one that already executed.  
+
