@@ -45,6 +45,7 @@
   - [Named entity recognition](#named-entity-recognition)
     - [Training NER](#training-ner)
   - [Siamese networks](#siamese-networks)
+    - [Architecture of Siamese network](#architecture-of-siamese-network)
 
 ## Neural Networks
 
@@ -891,3 +892,40 @@ Comparing meaning is not simple as comparing words.
 - Question duplicates (on platforms like Quora or stack overflow).
 - Search aging queries to predict whether a new query is similar to the one that already executed.  
 
+### Architecture of Siamese network  
+
+<img src="images/image-11.png"/>  
+
+**Structure of Siamese network**  
+
+The Siamese network has Two branches where each branch has:
+
+- Input.
+- Embedding.
+- LSTM (Not all Siamese networks are designed to contain LSTMs).
+- Output.
+
+The 2 branches are not separately-trained networks. 
+Both branches use the exact same weight matrices. 
+So if the LSTM has parameter set ${\theta}$, train one ${\theta}$ and both branches apply it.
+Think of it as calling the same function twice with two different arguments, not as two different functions.  
+  
+Why weight sharing is essential part?  
+One reason is shared weights = fewer parameters to train.  
+More important reason: if question's 1 subnetwork and question's 2 subnetwork ahd different wights, they'd each be learning their own arbitrary mapping from words to vector space. The resulting vectors would live in two unrelated coordinate systems, comparing them with cosine similarity would be meaning less.
+
+**Comparison step:**  
+
+Each branch outputs a vector (the LSTMs encoding of the input question's meaning). Then compute cosine similarity between the two output vectors.  
+
+$$
+\hat{y} = \cos(\theta) = \frac{v_1 \cdot v_2}{\|v_1\| \|v_2\|}
+$$  
+
+**Decision rule:**
+
+$$
+\hat{y} > {\tau} ⇒ duplicate, \hat{y} ≤ {\tau} ⇒ different
+$$  
+
+where ${\tau}$ is threshold hyperparameter.  
