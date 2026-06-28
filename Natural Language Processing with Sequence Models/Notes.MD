@@ -48,6 +48,7 @@
     - [Architecture of Siamese network](#architecture-of-siamese-network)
     - [Loss function](#loss-function)
   - [Triplets](#triplets)
+    - [Compute the cost](#compute-the-cost)
 
 ## Neural Networks
 
@@ -967,3 +968,37 @@ Increasing the hyperparameter alpha requires more optimization during training.
 - Semi-hard negative triplet: cos(A,N) < cos (A,P) < cos cos(A,N) + ${\alpha}$.  
 - Hard negative triplet: cos(A,P) < cos (A,P).
 
+### Compute the cost
+
+To compute the cost first you prepare the batches where every every example is an anchor and its own positive (each example on the left has a similar example on the write but no other example above or below it have the same meaning). The batch size is the size of sum of the examples.  
+
+**Example:**  
+
+| Example 1 | Example 2 |
+| :---: | :---: |  
+| What is your age? | How old are you? |  
+| Can you see me? | Are you seeing me? |  
+| Where are thou? | Where are you? |  
+| When is the game? | What time is the game? |  
+
+**b = 4**  
+
+$$
+L(A, P, N) = max(diff +{\alpha})
+$$
+$$
+diff = s(A, N) - s (A, P)
+$$  
+
+**Mean negative (mean_neg):** the mean negative of all the other off diagonals in a row.
+
+**Closest negative (closest_neg):** the corresponding to the highest number in the off diagonals (The larges number).  
+
+$Cost = max (- cos (A, P) + cos (A, N) +{\alpha}, 0  )$  
+
+Now we have 2 costs:
+
+$Cost1 = max (- cos (A, P) + mean_neg +{\alpha}, 0  )$  
+$Cost2 = max (- cos (A, P) + closest_neg +{\alpha}, 0  )$  
+
+The full cost is defined as: cost 1 + cost 2.  
