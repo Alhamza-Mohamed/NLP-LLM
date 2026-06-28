@@ -47,6 +47,7 @@
   - [Siamese networks](#siamese-networks)
     - [Architecture of Siamese network](#architecture-of-siamese-network)
     - [Loss function](#loss-function)
+  - [Triplets](#triplets)
 
 ## Neural Networks
 
@@ -950,3 +951,19 @@ S(A,P): the similarity between the anchor and the positive question. The similar
 S(A,N): the similarity between the anchor and the negative question. It is near -1.  
 
 Loss function: diff = S(A,N) - S(A,P).  
+
+## Triplets
+
+Triplets: group of anchors, positive and negative examples.  
+
+Simple loss: diff = S(A,N) - S(A,P).
+
+<img src="images/image-12.png"/>  
+
+Increasing the hyperparameter alpha requires more optimization during training.  
+
+- ${\alpha}$: Controls how far cos(A,P) is from cos(A,N).  
+- Easy negative triplet: cos(A,N) < cos (A,P).  
+- Semi-hard negative triplet: cos(A,N) < cos (A,P) < cos cos(A,N) + ${\alpha}$.  
+- Hard negative triplet: cos(A,P) < cos (A,P).
+
