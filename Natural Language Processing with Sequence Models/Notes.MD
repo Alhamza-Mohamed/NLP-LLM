@@ -46,6 +46,7 @@
     - [Training NER](#training-ner)
   - [Siamese networks](#siamese-networks)
     - [Architecture of Siamese network](#architecture-of-siamese-network)
+    - [Loss function](#loss-function)
 
 ## Neural Networks
 
@@ -929,3 +930,23 @@ $$
 $$  
 
 where ${\tau}$ is threshold hyperparameter.  
+
+### Loss function 
+
+Anchor: the input question that used to compare other questions against it.  
+
+Positive question: question that has the same meaning to the anchor.  
+
+Negative question: question that does not have the same meaning to the anchor.  
+
+To train the model compare the vectors that are output by each sub network using cosine similarity.  
+
+$$
+cos (v1, v2) = \frac{v_1 \cdot v_2}{\|v_1\| \|v_2\|}
+$$  
+
+S(A,P): the similarity between the anchor and the positive question. The similarity is between (-1, 1) so for similar questions (nearly identical vectors) the similarity is near 1.  
+
+S(A,N): the similarity between the anchor and the negative question. It is near -1.  
+
+Loss function: diff = S(A,N) - S(A,P).  
