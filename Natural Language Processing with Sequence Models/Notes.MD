@@ -49,6 +49,7 @@
     - [Loss function](#loss-function)
   - [Triplets](#triplets)
     - [Compute the cost](#compute-the-cost)
+  - [One-shot learning](#one-shot-learning)
 
 ## Neural Networks
 
@@ -1002,3 +1003,13 @@ $Cost1 = max (- cos (A, P) + mean_neg +{\alpha}, 0  )$
 $Cost2 = max (- cos (A, P) + closest_neg +{\alpha}, 0  )$  
 
 The full cost is defined as: cost 1 + cost 2.  
+
+## One-shot learning
+
+In problems like detecting author of a book or authentication of a signature there is 2 approaches.
+
+- **classification:** If you trained a model with dataset of K classes and you need to add a new class, you need to retrain the whole model with class = K + 1 with a classifier as softmax on all of them.  
+The problem that every time a new class appears you have to retrain the whole model, and if there is'nt enough new class's data the model wont have a good decision boundary for that class
+
+- **One-shot learning:** Instead of "which K classes does this belong to" the question becomes "are these two things the same or different".  
+Using a similarity function (like Siamese network + cosine similarity) you can compare any two inputs even the ones it's never seen before without retrain the whole model as the model only needs one reference  example per new class - thats why it is called one-shot.  
